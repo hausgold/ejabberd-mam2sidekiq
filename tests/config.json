@@ -1,0 +1,17 @@
+{
+  "hostname": "jabber.local",
+  "jid": "admin@jabber.local",
+  "password": "defaultpw",
+  "transport": "websocket",
+  "wsURL": "ws://jabber.local/ws",
+  "room": "test@conference.jabber.local",
+  "users": ["bob", "alice"],
+  "match": "mam2sidekiq",
+  "redis": {
+    "host": "redis",
+    "port": 6379,
+    "db": 5
+  },
+  "skipUnrelated": true,
+  "debug": false
+}

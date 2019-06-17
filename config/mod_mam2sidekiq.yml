@@ -1,0 +1,10 @@
+# Global Redis config
+# See: https://docs.ejabberd.im/admin/configuration/#redis
+redis_server: "redis.server.com"
+redis_port: 6379
+redis_db: 1
+
+modules:
+  mod_mam2sidekiq:
+    sidekiq_queue: "default"
+    sidekiq_class: "SomeWorker"

@@ -1,0 +1,5 @@
+author: "Hermann Mayer <hermann.mayer92@gmail.com>"
+category: "admin"
+summary: "Bridge all messages to Sidekiq"
+home: "https://github.com/hausgold/ejabberd-mam2sidekiq"
+url: "git@github.com:hausgold/ejabberd-mam2sidekiq.git"

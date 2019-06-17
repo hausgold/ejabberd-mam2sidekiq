@@ -1,0 +1,28 @@
+version: "3"
+services:
+  redis:
+    image: redis:3.2
+    network_mode: bridge
+
+  jabber:
+    build: .
+    network_mode: bridge
+    extra_hosts:
+      - jabber.local:127.0.0.1
+    volumes:
+      - ./:/app
+      - ./:/opt/modules.d/sources/mod_mam2sidekiq
+      - ./config/ejabberd.yml:/etc/ejabberd/ejabberd.yml
+      - ./config/ejabberdctl.cfg:/etc/ejabberd/ejabberdctl.cfg
+    links:
+      - redis
+    environment:
+      MDNS_HOSTNAME: jabber.local
+
+  e2e:
+    image: ruby:2.6
+    network_mode: bridge
+    volumes:
+      - ./tests/e2e:/app
+    links:
+      - redis
