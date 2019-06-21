@@ -27,7 +27,11 @@ module.exports = (client, utils) => {
     message: (callback) => {
       // Wait for the XMPP client
       setTimeout(() => {
-        client.joinRoom(config.room, 'admin');
+        client.joinRoom(
+          config.room,
+          // Nickname
+          'Admin Mustermann (b8346717-6e04-4e52-8799-cb5dce7858df)'
+        );
 
         setTimeout(() => {
           utils.log('Send a new message to ' + config.room.blue);

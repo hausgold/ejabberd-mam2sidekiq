@@ -62,6 +62,7 @@ XARGS ?= xargs
 # Container binaries
 EJABBERDCTL ?= ejabberdctl
 REDIS_CLI ?= redis-cli
+PSQL ?= psql
 WAITFORSTART ?= config/docker/wait-for-start
 
 ifeq ($(MAKE_ENV),docker)
@@ -137,6 +138,12 @@ COMPOSE := $(COMPOSE) -p $(PROJECT_NAME)
 
 .redis:
 	@$(eval BASH_RUN_SHELL_CONTAINER = redis)
+	@$(eval COMPOSE_RUN_COMMAND = exec)
+	@$(eval BASH_RUN_SHELL_USER = root)
+	@$(eval COMPOSE_RUN_SHELL_FLAGS = )
+
+.database:
+	@$(eval BASH_RUN_SHELL_CONTAINER = db)
 	@$(eval COMPOSE_RUN_COMMAND = exec)
 	@$(eval BASH_RUN_SHELL_USER = root)
 	@$(eval COMPOSE_RUN_SHELL_FLAGS = )
@@ -267,6 +274,7 @@ stop-containers:
 	@$(DOCKER) ps -a | $(GREP) $(PROJECT_NAME)_ | $(CUT) -d ' ' -f1 \
 		| $(XARGS) -rn10 $(DOCKER) stop -t 5 || true
 
+shell-test: shell
 shell: .test
 	# Start an interactive shell session
 	@$(eval BASH_RUN_SHELL_USER = app)
@@ -276,15 +284,38 @@ shell-redis: .redis
 	# Start an interactive database session
 	@$(call run-shell,$(REDIS_CLI))
 
+shell-db: .database
+	# Start an interactive database session
+	@$(call run-shell,PGPASSWORD=postgres $(PSQL) $(DATABASE) postgres)
+
 shell-e2e: .e2e
 	# Start an interactive e2e shell session
 	@$(call run-shell,$(BASH) -i)
 
-clean-database: clean-redis
+clean-database: \
+	clean-redis \
+	clean-postgres
 
 clean-redis: .redis
 	# Clean the Redis database
 	@$(call run-shell,$(REDIS_CLI) FLUSHALL >/dev/null 2>&1)
+
+clean-postgres:  .database
+	# Clean the database tables
+	@$(call run-shell,PGPASSWORD=postgres $(PSQL) $(DATABASE) postgres -c \
+		"TRUNCATE TABLE archive CASCADE; \
+		 TRUNCATE TABLE archive_prefs CASCADE; \
+		 TRUNCATE TABLE muc_online_room CASCADE; \
+		 TRUNCATE TABLE muc_online_users CASCADE; \
+		 TRUNCATE TABLE muc_registered CASCADE; \
+		 TRUNCATE TABLE muc_room CASCADE; \
+		 TRUNCATE TABLE muc_room_subscribers CASCADE; \
+		 TRUNCATE TABLE sm CASCADE; \
+		 TRUNCATE TABLE spool CASCADE; \
+		 TRUNCATE TABLE vcard_search CASCADE; \
+		 TRUNCATE TABLE vcard CASCADE; \
+		 TRUNCATE TABLE sr_user CASCADE;" \
+		 >/dev/null 2>&1)
 
 clean-vendors:
 	# Clean vendors

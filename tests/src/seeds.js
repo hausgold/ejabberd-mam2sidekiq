@@ -5,7 +5,9 @@ const createRoom = require('../lib/rooms');
 module.exports = (client) => {
   return (callback) => {
     async.waterfall([
-      function(callback) { createUsers(client.config.users, callback); },
+      function(callback) {
+        createUsers(client.config.users, callback);
+      },
       function(users, callback) {
         createRoom(client.config.room,
                    users.map((user) => user.jid),

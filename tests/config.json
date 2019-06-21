@@ -6,6 +6,11 @@
   "wsURL": "ws://jabber.local/ws",
   "room": "test@conference.jabber.local",
   "users": ["bob", "alice"],
+  "uuid": {
+    "admin": "b8346717-6e04-4e52-8799-cb5dce7858df",
+    "bob": "1e7f3f82-047b-4eba-9a78-d6b81e4d3647",
+    "alice": "fc20e9f2-b223-4a75-ab37-365068d5b52c"
+  },
   "match": "mam2sidekiq",
   "redis": {
     "host": "redis",

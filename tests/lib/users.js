@@ -2,6 +2,7 @@ const request = require('request');
 const async = require('async');
 const config = require('../config');
 const utils = require('./utils')(config);
+const xmppClient = require('../src/client');
 
 /**
  * Create a new ejabberd user account.
@@ -20,24 +21,54 @@ var createUser = function(name, callback)
       },
       form: {
         newusername: name,
-        newuserpassword: name,
+        newuserpassword: config.password,
         addnewuser: 'add'
       }
     },
     function(err, res, body) {
       if (!err && res.statusCode === 200) {
         let jid = `${name}@${config.hostname}`;
+        let firstName = name.charAt(0).toUpperCase() + name.slice(1);
         utils.log(`Create user ${jid.blue}`, false, 1);
         return callback && callback(null, {
           user: name,
-          password: name,
-          jid: jid
+          firstName: firstName,
+          lastName: 'Mustermann',
+          password: config.password,
+          jid: jid,
+          id: config.uuid[name]
         });
       }
 
       utils.log(`User creation failed. (${name})`, false, 1);
       utils.log(`Error: ${err.message}`, false, 1);
       callback && callback(new Error());
+  });
+};
+
+/**
+ * Create a new vCard for a user.
+ *
+ * @param {String} user The user instance
+ * @param {Function} callback The function to call on finish
+ */
+var createVcard = function(user, callback)
+{
+  utils.log(`Create vCard for ${user.jid.blue}`, false, 1);
+
+  xmppClient(Object.assign({}, config, {
+    jid: user.jid
+  }), (client) => {
+
+    client.publishVCard({
+      name: { family: user.lastName, given: user.firstName },
+      role: 'broker',
+      website: `gid://app/User/${user.id}`,
+      fullName: `${user.firstName} ${user.lastName}`
+    });
+
+    client.disconnect();
+    callback && callback(null, user);
   });
 };
 
@@ -50,11 +81,23 @@ var createUser = function(name, callback)
  */
 module.exports = function(users, callback)
 {
-  async.map(users, createUser, function(err, users) {
-    if (err) {
-      return callback && callback(err);
-    }
+  const pass = (users, callback) => {
+    if (!callback) { return users(null); }
+    callback(null, users);
+  };
 
-    callback && callback(null, users);
+  async.waterfall([
+    (callback) => async.map(users, createUser, callback),
+    (users, callback) => async.map(users, createVcard, callback),
+    (users, callback) => createVcard({
+      firstName: 'Admin',
+      lastName: 'Mustermann',
+      password: config.password,
+      jid: config.jid,
+      id: config.uuid.admin
+    }, (err) => callback(err, users)),
+  ], (err, users) => {
+    if (err) { return callback(err); }
+    callback(null, users);
   });
 };
