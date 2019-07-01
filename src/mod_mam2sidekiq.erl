@@ -4,13 +4,14 @@
 -export([%% ejabberd module API
          start/2, stop/1, reload/3, depends/2, mod_opt_type/1,
          %% Hooks
-         on_store_mam_message/6
+         on_muc_filter_message/3, on_store_mam_message/6
         ]).
 
 -include("ejabberd.hrl").
 -include("logger.hrl").
 -include("xmpp.hrl").
 -include("mod_mam.hrl").
+-include("mod_muc_room.hrl").
 -include("mod_mam2sidekiq.hrl").
 
 -callback store(#job{}) -> ok.
@@ -20,7 +21,10 @@
 -spec start(binary(), gen_mod:opts()) -> ok.
 start(Host, _Opts) ->
   %% Register hooks
-  %% Run the MUC IQ hook after mod_mam (101)
+  %% Run the meta addition for MUC messages, before mod_mam gets it (49)
+  ejabberd_hooks:add(muc_filter_message,
+                     Host, ?MODULE, on_muc_filter_message, 49),
+  %% Run the Sidekiq bridge hook before mod_mam storage (101)
   ejabberd_hooks:add(store_mam_message,
                      Host, ?MODULE, on_store_mam_message, 101),
   %% Log the boot up of the module
@@ -33,7 +37,10 @@ stop(Host) ->
   %% Deregister the custom XMPP codec
   xmpp:unregister_codec(hg_read_markers),
   %% Deregister all the hooks
-  ejabberd_hooks:delete(muc_process_iq, Host, ?MODULE, on_muc_iq, 101),
+  ejabberd_hooks:delete(store_mam_message,
+                        Host, ?MODULE, on_store_mam_message, 101),
+  ejabberd_hooks:delete(muc_filter_message,
+                        Host, ?MODULE, on_muc_filter_message, 49),
   %% Signalize we are done with stopping the module
   ?INFO_MSG("[M2S] Stop MAM/Sidekiq bridge", []),
   ok.
@@ -42,6 +49,18 @@ stop(Host) ->
 -spec reload(binary(), gen_mod:opts(), gen_mod:opts()) -> ok.
 reload(_Host, _NewOpts, _OldOpts) -> ok.
 
+%% Unfortunately the mod_man +store_mam_message+ hook does not deliver the
+%% state data structure of a groupchat message (MUC). We need to get all
+%% member/owner affiliations and put their respective JIDs on the packet meta
+%% as +users+ key. This will later be picked up by the regular
+%% +on_muc_filter_message+ hook to add all the receiver +<to>+ elements of the
+%% event meta data.
+-spec on_muc_filter_message(message(), mod_muc_room:state(),
+                            binary()) -> message().
+on_muc_filter_message(#message{} = Packet, MUCState, _FromNick) ->
+  xmpp:put_meta(Packet, users, get_muc_users(MUCState));
+on_muc_filter_message(Acc, _MUCState, _FromNick) -> Acc.
+
 %% Hook on all MAM (message archive management) storage requests to grab the
 %% stanza packet and write it out to Redis in a Sidekiq compatible format. This
 %% is the core of this module and takes care of the message bridging for third
@@ -49,9 +68,21 @@ reload(_Host, _NewOpts, _OldOpts) -> ok.
 -spec on_store_mam_message(message() | drop, binary(), binary(), jid(),
                            chat | groupchat, recv | send) -> message().
 on_store_mam_message(#message{} = Packet, _LUser, _LServer, _Peer,
-                     Type, recv) ->
+                     groupchat = Type, recv) ->
+  %% Prepare all +<meta>+ element children
+  Elements = [get_meta_from_element(Packet)]
+    ++ get_meta_to_elements(Packet, groupchat),
   %% Write the Sidekiq job to the Redis queue (list)
-  store(create_job(create_event(Packet, Type))),
+  store(create_job(create_event(Packet, Type, Elements))),
+  %% Remove our custom meta data again
+  xmpp:del_meta(Packet, users);
+on_store_mam_message(#message{} = Packet, _LUser, _LServer, _Peer,
+                     chat = Type, recv) ->
+  %% Prepare all +<meta>+ element children
+  Elements = [get_meta_from_element(Packet)]
+    ++ get_meta_to_elements(Packet, chat),
+  %% Write the Sidekiq job to the Redis queue (list)
+  store(create_job(create_event(Packet, Type, Elements))),
   %% Pass through the input message packet
   Packet;
 on_store_mam_message(Packet, _LUser, _LServer, _Peer, _Type, _Dir) -> Packet.
@@ -100,32 +131,62 @@ create_job(Event) ->
 %% Assemble a wrapping XML event element with meta data. This serves as first
 %% argument to the Sidekiq job and contains the actual MAM message and relevant
 %% meta data.
--spec create_event(message(), chat | groupchat) -> binary().
-create_event(#message{} = Packet, Type) ->
+-spec create_event(message(), chat | groupchat, [#xmlel{}]) -> binary().
+create_event(#message{} = Packet, Type, Elements) ->
   %% Assemble the meta data XML blob for the Sidekiq job event/message wrapper
   Meta = #xmlel{name = "meta",
                 attrs = [{"type", misc:atom_to_binary(Type)},
                          {"id", get_stanza_id(Packet)},
-                         {"from", nickname_jid(Packet, from, Type)},
-                         {"to", nickname_jid(Packet, to, Type)}]},
+                         {"from", jid:encode(get_jid(Packet, from))},
+                         {"to", jid:encode(get_jid(Packet, to))}],
+                children = Elements},
   %% Build the wrapping event
   fxml:element_to_binary(#xmlel{name = "event",
                                 attrs = [{"xmlns", ?NS_MAM_SIDEKIQ}],
                                 children = [Meta, xmpp:encode(Packet)]}).
 
-%% Fetch the JID with nickname resource for the given message packet.
--spec nickname_jid(message(), from | to, chat | groupchat) -> string().
-nickname_jid(#message{} = Packet, Dir, chat) ->
-  Jid = get_jid(Packet, Dir),
-  %% @TODO: Fetch the nickname from the Roster. (sql: rosterusers#jid -> #nick)
-  %%        jid:replace_resource(Jid, Nick)
-  jid:encode(Jid);
-nickname_jid(#message{} = Packet, Dir, groupchat) ->
-  Jid = get_jid(Packet, Dir),
-  %% @TODO: Fetch the nickname for the target MUC/(sender/receiver).
-  %%        jid:replace_resource(Jid, Nick)
-  jid:encode(Jid);
-nickname_jid(_Packet, _Dir, _Type) -> <<"unknown">>.
+%% Generate all relevant +<to>+ XML elements for the event meta payload.
+-spec get_meta_to_elements(#message{}, chat | groupchat) -> [#xmlel{}].
+get_meta_to_elements(Packet, chat) ->
+  Jid = get_jid(Packet, to),
+  [#xmlel{name = "to",
+          attrs = [{"jid", jid:encode(Jid)}],
+          children = get_vcard(Jid)}];
+get_meta_to_elements(Packet, groupchat) ->
+  lists:map(
+    fun(Jid) ->
+      #xmlel{name = "to",
+             attrs = [{"jid", jid:encode(Jid)}],
+              children = get_vcard(Jid)}
+    end, xmpp:get_meta(Packet, users)).
+
+%% Generate the shared +<from>+ XML element for the event meta payload.
+-spec get_meta_from_element(#message{}) -> #xmlel{}.
+get_meta_from_element(Packet) ->
+  Jid = get_jid(Packet, from),
+  #xmlel{name = "from",
+         attrs = [{"jid", jid:encode(Jid)}],
+         children = get_vcard(Jid)}.
+
+%% Fetch the vCard for the given JID.
+-spec get_vcard(jid()) -> [#xmlel{}].
+get_vcard(#jid{user = User, server = Server}) ->
+  case mod_vcard:get_vcard(User, Server) of
+    error -> [];
+    [] -> [];
+    Elements -> Elements
+  end.
+
+%% Extract all relevant users from the given MUC state (room).
+-spec get_muc_users(#state{}) -> [jid()].
+get_muc_users(StateData) ->
+  dict:fold(
+    fun(LJID, owner, Acc) -> [jid:make(LJID)|Acc];
+       (LJID, member, Acc) -> [jid:make(LJID)|Acc];
+       (LJID, {owner, _}, Acc) -> [jid:make(LJID)|Acc];
+       (LJID, {member, _}, Acc) -> [jid:make(LJID)|Acc];
+       (_, _, Acc) -> Acc
+  end, [], StateData#state.affiliations).
 
 %% Calculate the current UNIX time stamp.
 -spec get_current_unix_time() -> integer().
@@ -162,7 +223,9 @@ queue() ->
 
 %% Some ejabberd custom module API fullfilments
 -spec depends(binary(), gen_mod:opts()) -> [{module(), hard | soft}].
-depends(_Host, _Opts) -> [{mod_mam, hard}].
+depends(_Host, _Opts) -> [{mod_mam, hard},
+                          {mod_muc, hard},
+                          {mod_vcard, hard}].
 
 %% Parse or handle our configuration inputs
 -spec mod_opt_type(atom()) -> fun((term()) -> term()) | [atom()].

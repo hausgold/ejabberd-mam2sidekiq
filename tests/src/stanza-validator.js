@@ -73,7 +73,7 @@ module.exports = (utils) => {
         const missing = (regex, message) => matchMissing(xml, regex, message);
 
         contains(
-          `<message .* from=['"]${room}/admin['"] .*<body>.*</body></message>`,
+          `<message .* from=['"]${room}/[^'"]+[^'"] .*<body>.*</body></message>`,
           `Message response for ${room} failed.`
         );
       };

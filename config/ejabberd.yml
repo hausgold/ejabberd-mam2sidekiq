@@ -282,7 +282,7 @@ auth_password_format: scram
 ## Authentication using SQL
 ## Remember to setup a database in the next section.
 ##
-auth_method: internal
+auth_method: sql
 
 ##
 ## Authentication using PAM
@@ -348,7 +348,7 @@ auth_method: internal
 
 # However, if you want to use MySQL for all modules that support MySQL as
 # db_type, you can simply use global option default_db: sql:
-default_db: mnesia
+default_db: sql
 
 # Global Redis config
 redis_server: "redis"
@@ -376,11 +376,11 @@ redis_db: 5
 ##
 ## PostgreSQL server:
 ##
-# sql_type: pgsql
-# sql_server: "db"
-# sql_database: "jabber"
-# sql_username: "postgres"
-# sql_password: "postgres"
+sql_type: pgsql
+sql_server: "db"
+sql_database: "jabber"
+sql_username: "postgres"
+sql_password: "postgres"
 ##
 ## If you want to specify the port:
 ## sql_port: 1234
@@ -406,6 +406,12 @@ redis_db: 5
 ## Number of connections to open to the database for each virtual host
 ##
 ## sql_pool_size: 10
+
+##
+## If the connection to the database fails, ejabberd waits 30 seconds before
+## retrying. You can modify this interval with this option.
+##
+sql_start_interval: 10
 
 ##
 ## Interval to make a dummy SQL request to keep the connections to the
@@ -686,7 +692,7 @@ modules:
     request_activates_archiving: false
     iqdisc: one_queue
     default: always
-    db_type: mnesia
+    db_type: sql
   mod_muc:
     ## host: "conference.@HOST@"
     access: local
