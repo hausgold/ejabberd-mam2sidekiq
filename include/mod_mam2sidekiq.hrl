@@ -1,4 +1,4 @@
--define(MODULE_VERSION, <<"0.2.0-476">>).
+-define(MODULE_VERSION, <<"0.2.0-477">>).
 -define(NS_MAM_SIDEKIQ, <<"xmpp:mam:hausgold:sidekiq">>).
 
 %% A macro to convert a record to tuple{[tuples]} for jiffy (JSON) encoding

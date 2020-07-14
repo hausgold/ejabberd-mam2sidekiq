@@ -10,7 +10,6 @@ SHELL := bash
 MODULE ?= ejabberd-mam2sidekiq
 VERSION ?= 18.01
 MOD_VERSION ?= latest
-SOURCE_URL ?= https://github.com/processone/ejabberd/archive/$(VERSION).tar.gz
 
 # Directories
 INCLUDE_DIRS ?= ../include
@@ -21,9 +20,12 @@ SRC_DIR ?= ../src
 APTGET ?= apt-get
 CD ?= cd
 CP ?= cp
+DOCKER ?= docker
+DPKGBUILDPACKAGE ?= dpkg-buildpackage
 ERLC ?= erlc
 FIND ?= find
 MKDIR ?= mkdir
+PATCH ?= patch
 PWD ?= pwd
 SED ?= sed
 SUDO ?= sudo
@@ -31,24 +33,17 @@ TAR ?= tar
 TEST ?= test
 WGET ?= wget
 
-.download-ejabberd-sources:
-	# Download the ejabberd $(VERSION) sources
-	@$(TEST) -f ejabberd/autogen.sh || ( \
-		$(WGET) -O ejabberd.tar.gz $(SOURCE_URL) && \
-		$(MKDIR) -p ejabberd && \
-		$(TAR) xf ejabberd.tar.gz -C ejabberd --strip-components=1 \
-	)
-
 .install-ejabberd-build-deps:
 	# Install the ejabberd $(VERSION) build dependencies
 	@$(SUDO) $(APTGET) update -y
 	@$(SUDO) $(APTGET) build-dep -y ejabberd
-	@$(SUDO) $(APTGET) install -y libssl-dev libyaml-dev libgd-dev libwebp-dev
+	@$(SUDO) $(APTGET) install -y \
+		libssl-dev libyaml-dev libgd-dev libwebp-dev fakeroot
 
 .build-ejabberd:
 	# Build ejabberd $(VERSION) from source
-	@cd ejabberd && ./autogen.sh && ./configure --enable-redis \
-		&& ./rebar get-deps && $(MAKE)
+	@$(SUDO) $(APTGET) source ejabberd
+	@cd ejabberd-$(VERSION) && $(SUDO) $(DPKGBUILDPACKAGE) -us -uc
 
 .find-deps:
 	# Find all build dependencies
@@ -58,14 +53,19 @@ WGET ?= wget
 		$(shell $(FIND) `$(PWD)` -type d -name ebin) $(EBIN_DIRS)))
 
 install: \
-	.download-ejabberd-sources \
 	.install-ejabberd-build-deps \
-	.build-ejabberd \
-	.find-deps
+	.build-ejabberd
 
-build: install
+build:
+	# Setup a build environment
+	@$(DOCKER) build -t $(MODULE):build .
+	@$(DOCKER) run --rm -v $(shell pwd)/..:/build $(MODULE):build bash -c \
+		'make -C /build/.travis build-module'
+
+build-module: clean install .find-deps
 	# Build $(MODULE) module from source
 	@$(MKDIR) -p $(EBIN_DIRS)
+	@$(PATCH) -p1 -d .. < ubuntu.patch
 	@$(ERLC) \
 		-o $(EBIN_DIRS) \
 		$(INCLUDES) \
@@ -85,3 +85,7 @@ package:
 	@$(CD) package && \
 		$(TAR) cfvz ../$(MODULE)-$(MOD_VERSION).tar.gz --owner=0 --group=0 .
 	@$(RM) -rf package
+
+clean:
+	# Clean all build results and temporary files
+	@$(RM) -rf ejabberd*
