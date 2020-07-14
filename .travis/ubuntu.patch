@@ -1,0 +1,13 @@
+diff --git a/src/mod_mam2sidekiq.erl b/src/mod_mam2sidekiq.erl
+index 574f50c..2dde408 100644
+--- a/src/mod_mam2sidekiq.erl
++++ b/src/mod_mam2sidekiq.erl
+@@ -9,7 +9,7 @@
+ 
+ -include("ejabberd.hrl").
+ -include("logger.hrl").
+--include("xmpp.hrl").
++-include_lib("p1_xmpp/include/xmpp.hrl").
+ -include("mod_mam.hrl").
+ -include("mod_muc_room.hrl").
+ -include("mod_mam2sidekiq.hrl").

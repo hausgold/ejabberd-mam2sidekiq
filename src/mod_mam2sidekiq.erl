@@ -58,7 +58,10 @@ reload(_Host, _NewOpts, _OldOpts) -> ok.
 -spec on_muc_filter_message(message(), mod_muc_room:state(),
                             binary()) -> message().
 on_muc_filter_message(#message{} = Packet, MUCState, _FromNick) ->
-  xmpp:put_meta(Packet, users, get_muc_users(MUCState));
+  case xmpp:get_meta(Packet, users, not_found) of
+  not_found -> xmpp:put_meta(Packet, users, get_muc_users(MUCState));
+  _ -> Packet
+  end;
 on_muc_filter_message(Acc, _MUCState, _FromNick) -> Acc.
 
 %% Hook on all MAM (message archive management) storage requests to grab the
@@ -97,7 +100,7 @@ store(#job{} = Job) ->
   %% Push the new job to the Redis list
   case ejabberd_redis:q(["LPUSH", queue(), Json]) of
     {ok, _} -> ok;
-    Errs -> ?ERROR_MSG("[M2S] Failed to add job to Redis list. (~s)", [Json])
+    _ -> ?ERROR_MSG("[M2S] Failed to add job to Redis list. (~s)", [Json])
   end,
   ok.
 
