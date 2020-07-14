@@ -1,4 +1,4 @@
-## next
+## 1.0.0
 
 * Added a check for the affiliated users meta data of a packet
 * Fixed the CI setup
