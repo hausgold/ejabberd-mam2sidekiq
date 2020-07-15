@@ -77,8 +77,7 @@ on_store_mam_message(#message{} = Packet, _LUser, _LServer, _Peer,
     ++ get_meta_to_elements(Packet, groupchat),
   %% Write the Sidekiq job to the Redis queue (list)
   store(create_job(create_event(Packet, Type, Elements))),
-  %% Remove our custom meta data again
-  xmpp:del_meta(Packet, users);
+  Packet;
 on_store_mam_message(#message{} = Packet, _LUser, _LServer, _Peer,
                      chat = Type, recv) ->
   %% Prepare all +<meta>+ element children

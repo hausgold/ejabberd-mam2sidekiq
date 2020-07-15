@@ -1,3 +1,8 @@
+## next
+
+* Do not remove the meta.user data from a MUC packet in order to not interfere
+  with other modules (eg. mod_unread)
+
 ## 1.0.0
 
 * Added a check for the affiliated users meta data of a packet
