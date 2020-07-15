@@ -1,4 +1,4 @@
-## next
+## 1.0.1
 
 * Do not remove the meta.user data from a MUC packet in order to not interfere
   with other modules (eg. mod_unread)
