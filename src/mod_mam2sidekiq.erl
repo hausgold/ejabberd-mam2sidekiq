@@ -34,8 +34,6 @@ start(Host, _Opts) ->
 %% Stop the module, and deregister all hooks.
 -spec stop(binary()) -> any().
 stop(Host) ->
-  %% Deregister the custom XMPP codec
-  xmpp:unregister_codec(hg_read_markers),
   %% Deregister all the hooks
   ejabberd_hooks:delete(store_mam_message,
                         Host, ?MODULE, on_store_mam_message, 101),

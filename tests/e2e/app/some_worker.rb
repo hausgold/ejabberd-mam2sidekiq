@@ -25,12 +25,8 @@ class SomeWorker
       sleep 2
       puts "> end-to-end test finished.\n\n".bold.green
 
-      # We need kill our parent process here, because Sidekiq is not designed
-      # to be closed from within a job
-      pid = `ps -a`.lines.grep(/bundle/).first.strip.split(' ').first
-      system("kill -9 #{pid}")
-      sleep 1
-      system("kill -9 #{pid}")
+      # Signal Sidekiq to shutdown in order to finish the test
+      Sidekiq::ProcessSet.new.each(&:stop!)
     end
   end
 end

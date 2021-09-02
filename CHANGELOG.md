@@ -1,3 +1,7 @@
+## next
+
+* Migrated from Travis CI to Github Actions (#11)
+
 ## 1.0.1
 
 * Do not remove the meta.user data from a MUC packet in order to not interfere
