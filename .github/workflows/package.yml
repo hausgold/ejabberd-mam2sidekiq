@@ -24,18 +24,10 @@ jobs:
       - name: Configure the module version
         run: var MOD_VERSION ${APP_REF}
 
-      # TODO: Remove after testing.
-      - name: debug1
-        run: echo ${MOD_VERSION}
-
       - name: Build the module
         run: make -C .github build package
-
-      # TODO: Remove after testing.
-      - name: debug2
-        run: ls -lisa
 
       - name: Upload built module package
         run: >
           release-asset '${{ github.event.release.id }}'
-          "ejabberd-mam2sidekiq-${MOD_VERSION}.tar.gz"
+          ".github/ejabberd-mam2sidekiq-${MOD_VERSION}.tar.gz"

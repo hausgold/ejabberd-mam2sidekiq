@@ -1,4 +1,4 @@
-## next
+## 1.1.0
 
 * Migrated from Travis CI to Github Actions (#11)
 
