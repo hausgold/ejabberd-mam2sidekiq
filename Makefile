@@ -9,7 +9,7 @@ SHELL := bash
 # Environment switches
 MAKE_ENV ?= docker
 IMAGE_VENDOR ?= hausgold
-PROJECT_NAME ?= jabberreadmarkers
+PROJECT_NAME ?= jabbermam2sidekiq
 START ?= foreground
 START_CONTAINERS ?= jabber
 BUNDLE_FLAGS ?=
@@ -134,25 +134,25 @@ COMPOSE := $(COMPOSE) -p $(PROJECT_NAME)
 	@$(eval BASH_RUN_SHELL_CONTAINER = jabber)
 	@$(eval COMPOSE_RUN_COMMAND = exec)
 	@$(eval BASH_RUN_SHELL_USER = root)
-	@$(eval COMPOSE_RUN_SHELL_FLAGS = )
+	@$(eval COMPOSE_RUN_SHELL_FLAGS = -T)
 
 .redis:
 	@$(eval BASH_RUN_SHELL_CONTAINER = redis)
 	@$(eval COMPOSE_RUN_COMMAND = exec)
 	@$(eval BASH_RUN_SHELL_USER = root)
-	@$(eval COMPOSE_RUN_SHELL_FLAGS = )
+	@$(eval COMPOSE_RUN_SHELL_FLAGS = -T)
 
 .database:
 	@$(eval BASH_RUN_SHELL_CONTAINER = db)
 	@$(eval COMPOSE_RUN_COMMAND = exec)
 	@$(eval BASH_RUN_SHELL_USER = root)
-	@$(eval COMPOSE_RUN_SHELL_FLAGS = )
+	@$(eval COMPOSE_RUN_SHELL_FLAGS = -T)
 
 .test:
 	@$(eval BASH_RUN_SHELL_CONTAINER = jabber)
 	@$(eval COMPOSE_RUN_COMMAND = exec)
 	@$(eval BASH_RUN_SHELL_USER = app)
-	@$(eval COMPOSE_RUN_SHELL_FLAGS = )
+	@$(eval COMPOSE_RUN_SHELL_FLAGS = -T)
 
 .e2e:
 	@$(eval BASH_RUN_SHELL_CONTAINER = e2e)

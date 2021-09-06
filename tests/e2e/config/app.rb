@@ -11,6 +11,7 @@ $messages = 0
 
 require 'bundler/setup' # Set up gems listed in the Gemfile.
 Bundler.require(:default)
+require 'sidekiq/api'
 require_relative '../app/some_worker'
 
 url = 'redis://redis/5'
