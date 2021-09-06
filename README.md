@@ -1,6 +1,6 @@
 ![ejabberd MAM/Sidekiq Bridge](doc/assets/project.svg)
 
-[![Build Status](https://api.travis-ci.com/hausgold/ejabberd-mam2sidekiq.svg?token=4XcyqxxmkyBSSV3wWRt7&branch=master)](https://travis-ci.com/hausgold/ejabberd-mam2sidekiq)
+[![Test](https://github.com/hausgold/ejabberd-mam2sidekiq/actions/workflows/test.yml/badge.svg)](https://github.com/hausgold/ejabberd-mam2sidekiq/actions/workflows/test.yml)
 
 This is a custom [ejabberd](https://www.ejabberd.im/) module which allows to
 bridge all archived messages (from [Message Archive
