@@ -1,11 +1,11 @@
 version: "3"
 services:
   redis:
-    image: redis:3.2
+    image: redis:6.2
     network_mode: bridge
 
   db:
-    image: postgres:9.6
+    image: postgres:13.7
     network_mode: bridge
     volumes:
       - ./config/postgres:/docker-entrypoint-initdb.d
@@ -30,7 +30,7 @@ services:
       MDNS_HOSTNAME: jabber.local
 
   e2e:
-    image: ruby:2.6
+    image: ruby:2.7
     network_mode: bridge
     volumes:
       - ./tests/e2e:/app
