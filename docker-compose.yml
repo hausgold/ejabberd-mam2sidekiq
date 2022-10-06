@@ -5,13 +5,14 @@ services:
     network_mode: bridge
 
   db:
-    image: postgres:13.7
+    image: postgres:14.4
     network_mode: bridge
     volumes:
       - ./config/postgres:/docker-entrypoint-initdb.d
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: --auth-host=md5
 
   jabber:
     build: .
