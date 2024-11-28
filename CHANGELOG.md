@@ -3,6 +3,7 @@
 * Upgraded to PostgreSQL 15.2 and Redis 7.0 (#25)
 * Upgraded PostgreSQL to 16.4 (#27)
 * Upgraded PostgreSQL to 16.6 (#28)
+* Upgraded PostgreSQL to 17.2 (#29)
 
 ## 1.1.0
 
