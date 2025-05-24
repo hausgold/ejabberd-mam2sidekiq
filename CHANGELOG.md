@@ -6,6 +6,7 @@
 * Upgraded PostgreSQL to 17.2 (#29)
 * Switched from Redis to Valkey (#30)
 * Upgraded PostgreSQL to 17.4 (#31)
+* Upgraded PostgreSQL to 17.5 (#32)
 
 ## 1.1.0
 
