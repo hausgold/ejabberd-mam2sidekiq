@@ -7,6 +7,7 @@
 * Switched from Redis to Valkey (#30)
 * Upgraded PostgreSQL to 17.4 (#31)
 * Upgraded PostgreSQL to 17.5 (#32)
+* Upgraded to node.js 22 (#39)
 
 ## 1.1.0
 
