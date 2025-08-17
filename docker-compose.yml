@@ -1,10 +1,10 @@
 services:
   redis:
-    image: valkey/valkey:8.0
+    image: valkey/valkey:8.1
     network_mode: bridge
 
   db:
-    image: postgres:17.5
+    image: postgres:17.6
     network_mode: bridge
     volumes:
       - ./config/postgres:/docker-entrypoint-initdb.d
