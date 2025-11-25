@@ -8,6 +8,7 @@
 * Upgraded PostgreSQL to 17.4 (#31)
 * Upgraded PostgreSQL to 17.5 (#32)
 * Upgraded to PostgreSQL 17.6 and Valkey 8.1 (#33)
+* Upgraded PostgreSQL to 18.1 (#45)
 
 ## 1.1.0
 
