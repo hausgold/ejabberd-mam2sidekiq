@@ -14,7 +14,7 @@ direct messages to be processed the same way as multi user chat messages on
 third party applications. This module requires an activated [ejabberd
 mod_mam](https://docs.ejabberd.im/admin/configuration/#mod-mam) to work,
 because we listen for the storage hooks. They do not suffer from message
-dupplication. (Copies, changing sender/receiver side)
+duplication. (Copies, changing sender/receiver side)
 
 - [Requirements](#requirements)
   - [Runtime](#runtime)
