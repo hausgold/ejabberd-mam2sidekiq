@@ -1,6 +1,6 @@
 ## next
 
-* TODO: Replace this bullet point with an actual description of a change.
+* Upgraded to Ruby 3.4/Sidekiq 7.3 on e2e test suite (#50)
 
 ## 1.2.1
 

@@ -30,7 +30,7 @@ services:
       MDNS_HOSTNAME: jabber.local
 
   e2e:
-    image: ruby:2.7
+    image: ruby:3.4
     network_mode: bridge
     volumes:
       - ./tests/e2e:/app
