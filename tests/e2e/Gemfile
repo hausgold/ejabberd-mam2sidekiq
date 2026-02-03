@@ -3,7 +3,7 @@
 source 'https://rubygems.org'
 
 # Simple, efficient background processing for Ruby.
-gem 'sidekiq', '~> 7.3'
+gem 'sidekiq', '~> 8.1'
 # Extends String class or add a ColorizedString with methods to set text color,
 # background color and text effects.
 gem 'colorize', '~> 1.1'

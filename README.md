@@ -35,6 +35,9 @@ duplication. (Copies, changing sender/receiver side)
 * [ejabberd](https://www.ejabberd.im/) (=18.01)
   * Compiled Redis support (`--enable-redis` or [erlang-redis-client package](https://packages.ubuntu.com/bionic/erlang-redis-client) on [hausgold/ejabberd](https://hub.docker.com/r/hausgold/ejabberd) image)
 * [Redis](https://redis.io/) (>=3.2)
+* [Valkey](https://valkey.io/) (>=8.1)
+* [Sidekiq](https://sidekiq.org/) (>=8.0)
+  * For Sidekiq <8.0 use version 1.x of this module
 
 ### Build and development
 

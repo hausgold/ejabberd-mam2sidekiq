@@ -1,20 +1,20 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    base64 (0.3.0)
     colorize (1.1.0)
-    connection_pool (2.5.5)
+    connection_pool (3.0.2)
+    json (2.18.0)
     logger (1.7.0)
     rack (3.2.4)
-    redis-client (0.26.3)
+    redis-client (0.26.4)
       connection_pool
     rexml (3.4.4)
-    sidekiq (7.3.10)
-      base64
-      connection_pool (>= 2.3.0, < 3)
-      logger
-      rack (>= 2.2.4, < 3.3)
-      redis-client (>= 0.23.0, < 1)
+    sidekiq (8.1.0)
+      connection_pool (>= 3.0.0)
+      json (>= 2.16.0)
+      logger (>= 1.7.0)
+      rack (>= 3.2.0)
+      redis-client (>= 0.26.0)
 
 PLATFORMS
   ruby
@@ -22,7 +22,7 @@ PLATFORMS
 DEPENDENCIES
   colorize (~> 1.1)
   rexml (~> 3.4)
-  sidekiq (~> 7.3)
+  sidekiq (~> 8.1)
 
 BUNDLED WITH
    2.6.9
