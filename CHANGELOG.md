@@ -1,5 +1,9 @@
 ## next
 
+* TODO: Replace this bullet point with an actual description of a change.
+
+## 2.0.0
+
 * Upgraded Sidekiq requirement to >= 8.0 as [the storage format for
   `created_at` and `enqueued_at` was
   changed](https://github.com/sidekiq/sidekiq/blob/main/Changes.md#800) (#51)
