@@ -191,8 +191,7 @@ get_muc_users(StateData) ->
 %% Calculate the current UNIX time stamp.
 -spec get_current_unix_time() -> integer().
 get_current_unix_time() ->
-  {MegaSecs, Secs, _MicroSecs} = erlang:timestamp(),
-  MegaSecs * 1000000 + Secs.
+  erlang:system_time(millisecond).
 
 %% Generate a new random job id for Sidekiq.
 %% (12-byte random number as 24 char hex string)

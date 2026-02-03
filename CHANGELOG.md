@@ -1,6 +1,13 @@
 ## next
 
-* TODO: Replace this bullet point with an actual description of a change.
+* Upgraded Sidekiq requirement to >= 8.0 as [the storage format for
+  `created_at` and `enqueued_at` was
+  changed](https://github.com/sidekiq/sidekiq/blob/main/Changes.md#800) (#51)
+
+  The `created_at`, `enqueued_at`, `failed_at` and `retried_at` attributes are
+  now stored as epoch milliseconds, rather than epoch floats.  This is meant to
+  avoid precision issues with JSON and JavaScript's 53-bit Floats.  Example:
+  `"created_at" => 1234567890.123456` -> `"created_at" => 1234567890123`.
 
 ## 1.3.0
 
