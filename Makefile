@@ -240,7 +240,7 @@ test: \
 test-specs: .test
 	# Run test specs for the $(MODULE) module
 	@$(MAKE) clean-database
-	@$(call run-shell,$(NODE) tests/index.js)
+	@$(call run-shell,FORCE_COLOR=1 $(NODE) tests/index.js)
 
 test-e2e:
 	# Run end-to-end tests for the $(MODULE) module
@@ -249,7 +249,7 @@ test-e2e:
 
 .test-e2e-produce: .test
 	# Produce Sidekiq jobs
-	@$(call run-shell,$(NODE) tests/index-e2e.js)
+	@$(call run-shell,FORCE_COLOR=1 $(NODE) tests/index-e2e.js)
 
 .test-e2e-consume: .e2e
 	# Consume Sidekiq jobs

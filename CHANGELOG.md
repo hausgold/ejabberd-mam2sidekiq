@@ -1,6 +1,8 @@
 ## next
 
-* TODO: Replace this bullet point with an actual description of a change.
+* Upgraded to ruby 4.0 (#54)
+* Upgraded to node.js 25 (#54)
+* Upgraded the test suite to stanza.io 10.3 (#54)
 
 ### 2.2.0
 
