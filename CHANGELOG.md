@@ -1,5 +1,9 @@
 ## next
 
+* TODO: Replace this bullet point with an actual description of a change.
+
+### 2.4.0
+
 * Upgraded Valkey to 9.0 (#55)
 
 ### 2.3.0
