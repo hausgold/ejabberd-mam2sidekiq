@@ -19,7 +19,7 @@
 set -eE
 
 # Specify the module/ejabberd version
-MOD_VERSION=2.5.0
+MOD_VERSION=2.6.0
 SUPPORTED_EJABBERD_VERSION=18.01
 
 # Check for Debian/Ubuntu, otherwise die

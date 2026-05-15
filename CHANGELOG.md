@@ -1,5 +1,9 @@
 ### next
 
+* TODO: Replace this bullet point with an actual description of a change.
+
+### 2.6.0
+
 * Upgraded to node.js 26 (#57)
 
 ### 2.5.0
