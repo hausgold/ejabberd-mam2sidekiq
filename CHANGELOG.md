@@ -1,5 +1,9 @@
 ### next
 
+* TODO: Replace this bullet point with an actual description of a change.
+
+### 2.5.0
+
 * Upgraded PostgreSQL to 18.4 (#56)
 
 ### 2.4.0
