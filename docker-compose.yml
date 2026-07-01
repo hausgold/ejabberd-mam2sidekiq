@@ -1,6 +1,6 @@
 services:
   redis:
-    image: valkey/valkey:9.0
+    image: valkey/valkey:9.1
     network_mode: bridge
 
   db:
