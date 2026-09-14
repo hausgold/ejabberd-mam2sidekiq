@@ -4,7 +4,7 @@ services:
     network_mode: bridge
 
   db:
-    image: postgres:18.4
+    image: postgres:18.6
     network_mode: bridge
     volumes:
       - ./config/postgres:/docker-entrypoint-initdb.d
